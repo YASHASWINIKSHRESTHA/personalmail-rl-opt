@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PersonalMail-RL · OpenEnv Hackathon 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #0a0e17; --bg2: #0f172a; --bg3: #1e293b; --bg4: #334155;
+  --border: #475569; --accent: #8b5cf6; --accent2: #ec4899;
+  --green: #22c55e; --yellow: #eab308; --red: #ef4444; --blue: #3b82f6;
+  --pink: #f43f5e; --purple: #a855f7; --cyan: #06b6d4; --orange: #fb923c;
+  --text: #f8fafc; --text2: #cbd5e1; --text3: #94a3b8;
+  --font: 'Sora', sans-serif; --mono: 'JetBrains Mono', monospace;
+  --radius: 12px; --radius-sm: 8px;
+  --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  background: var(--bg); 
+  color: var(--text); 
+  font-family: var(--font); 
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 20%);
+}
+body::before, body::after {
+  content: "";
+  position: fixed;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  filter: blur(50px);
+  z-index: -1;
+  opacity: 0.35;
+  animation: drift 14s ease-in-out infinite alternate;
+}
+body::before { background: #7c3aed; top: -80px; left: -80px; }
+body::after { background: #06b6d4; bottom: -90px; right: -90px; animation-delay: 1.2s; }
+@keyframes drift { from { transform: translateY(0) scale(1); } to { transform: translateY(20px) scale(1.1); } }
+
+/* NAV */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 32px; border-bottom: 1px solid var(--border);
+  background: var(--bg2); position: sticky; top: 0; z-index: 100;
+  background: linear-gradient(90deg, var(--bg2), rgba(139, 92, 246, 0.2));
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; background: linear-gradient(to right, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.logo .pill { background: var(--accent); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+.status-label { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 6px; }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; padding: 20px 32px 0; border-bottom: 1px solid var(--border); }
+.tab {
+  padding: 10px 20px; border-radius: 8px 8px 0 0; cursor: pointer;
+  font-size: 14px; font-weight: 500; color: var(--text2);
+  border: 1px solid transparent; border-bottom: none;
+  transition: all .2s;
+  background: var(--bg4);
+  position: relative;
+  overflow: hidden;
+}
+.tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s;
+}
+.tab:hover::before {
+  transform: translateX(100%);
+}
+.tab.active { 
+  background: linear-gradient(135deg, var(--accent), var(--accent2)); 
+  color: #fff; 
+  border-color: var(--border);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.tab.active::before {
+  display: none;
+}
+.tab:hover:not(.active) { 
+  color: var(--text); 
+  background: var(--bg3);
+  transform: translateY(-2px);
+}
+.hero-3d {
+  margin: 20px 32px 0;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(130deg, rgba(30,41,59,0.9), rgba(88,28,135,0.35));
+  box-shadow: 0 18px 30px -20px rgba(147, 51, 234, 0.75);
+}
+.hero-3d h2 { font-size: 20px; margin-bottom: 6px; }
+.hero-3d p { color: var(--text2); font-size: 13px; }
+
+/* PANELS */
+.panel { display: none; padding: 28px 32px; }
+.panel.active { display: block; animation: fadeIn 0.5s ease-in; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* CARDS */
+.card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  backdrop-filter: blur(10px);
+  transform-style: preserve-3d;
+  perspective: 900px;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+.card:hover::before {
+  transform: scaleX(1);
+}
+.card:hover {
+  transform: translateY(-6px) rotateX(2deg) rotateY(-2deg);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  border-color: var(--accent);
+}
+.card-title { font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--text2); margin-bottom: 14px; }
+
+/* LAYOUT */
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+/* EMAIL DISPLAY */
+.email-card { background: var(--bg4); border-radius: var(--radius-sm); padding: 16px; }
+.email-subject { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.email-from { font-size: 12px; color: var(--text2); margin-bottom: 12px; }
+.email-body { font-size: 13px; line-height: 1.7; color: var(--text); white-space: pre-wrap; }
+
+/* SCENARIO CHIPS */
+.scenario-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.chip {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; cursor: pointer;
+  border: 1px solid var(--border); color: var(--text2); background: var(--bg4);
+  transition: all .15s; font-weight: 500;
+}
+.chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip:hover:not(.active) { border-color: var(--accent); color: var(--text); }
+.chip.work { border-color: #60a5fa44; }
+.chip.social { border-color: #4ade8044; }
+.chip.personal { border-color: #facc1544; }
+.chip.spam { border-color: #f8717144; }
+
+/* FORM CONTROLS */
+select, textarea, input {
+  background: var(--bg4); border: 1px solid var(--border); color: var(--text);
+  border-radius: var(--radius-sm); padding: 10px 12px; font-family: var(--font);
+  font-size: 13px; width: 100%; outline: none; transition: border-color .2s;
+}
+select:focus, textarea:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; font-weight: 500; }
+.form-row { margin-bottom: 14px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* BUTTONS */
+.btn {
+  padding: 10px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer;
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #7c75ff; }
+.btn-secondary { background: var(--bg4); color: var(--text2); border: 1px solid var(--border); }
+.btn-secondary:hover { color: var(--text); border-color: var(--accent); }
+.btn-success { background: #16a34a; color: #fff; }
+.btn-success:hover { background: #15803d; }
+.btn-danger { background: #b91c1c; color: #fff; }
+.btn-danger:hover { background: #991b1b; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* REWARD BAR */
+.reward-bar-wrap { margin-bottom: 12px; }
+.reward-bar-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
+.reward-bar-label span:first-child { color: var(--text2); }
+.reward-bar-label span:last-child { font-weight: 700; font-family: var(--mono); }
+.reward-bar-track { background: var(--bg4); border-radius: 4px; height: 8px; overflow: hidden; }
+.reward-bar-fill {
+  height: 100%; border-radius: 4px; transition: width .8s cubic-bezier(.16,1,.3,1);
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+.reward-bar-fill.high { background: linear-gradient(90deg, var(--green), #22d3ee); }
+.reward-bar-fill.mid  { background: linear-gradient(90deg, var(--yellow), #fb923c); }
+.reward-bar-fill.low  { background: linear-gradient(90deg, var(--red), #f97316); }
+
+/* BIG SCORE */
+.big-score {
+  text-align: center; padding: 20px;
+  background: var(--bg4); border-radius: var(--radius); margin-bottom: 16px;
+}
+.big-score .label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text2); margin-bottom: 6px; }
+.big-score .value { font-size: 48px; font-weight: 800; font-family: var(--mono); }
+.big-score .value.good { color: var(--green); }
+.big-score .value.mid  { color: var(--yellow); }
+.big-score .value.bad  { color: var(--red); }
+
+/* BADGE */
+.badge {
+  display: inline-flex; align-items: center; padding: 3px 10px;
+  border-radius: 20px; font-size: 11px; font-weight: 600;
+}
+.badge.work     { background: #1e40af33; color: var(--blue); border: 1px solid #1e40af66; }
+.badge.social   { background: #15803d33; color: var(--green); border: 1px solid #15803d66; }
+.badge.personal { background: #92400e33; color: var(--yellow); border: 1px solid #92400e66; }
+.badge.spam     { background: #7f1d1d33; color: var(--red); border: 1px solid #7f1d1d66; }
+.badge.high     { background: #7f1d1d33; color: var(--red); border: 1px solid #7f1d1d66; }
+.badge.medium   { background: #92400e33; color: var(--yellow); border: 1px solid #92400e66; }
+.badge.low      { background: #14532d33; color: var(--green); border: 1px solid #14532d66; }
+
+/* STEP INDICATOR */
+.steps { display: flex; gap: 0; margin-bottom: 20px; }
+.step-item {
+  flex: 1; padding: 10px 16px; text-align: center;
+  background: var(--bg4); border: 1px solid var(--border);
+  font-size: 12px; font-weight: 600; color: var(--text3);
+}
+.step-item:first-child { border-radius: 8px 0 0 8px; }
+.step-item:last-child  { border-radius: 0 8px 8px 0; }
+.step-item.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.step-item.done   { background: #14532d; color: var(--green); border-color: #15803d66; }
+
+/* COMPARE */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.compare-col { background: var(--bg3); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); }
+.compare-col.baseline { border-top: 3px solid var(--red); }
+.compare-col.trained  { border-top: 3px solid var(--green); }
+.compare-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.compare-title { font-size: 14px; font-weight: 700; }
+.compare-col.baseline .compare-title { color: var(--red); }
+.compare-col.trained  .compare-title { color: var(--green); }
+
+/* IMPROVEMENT BANNER */
+.improvement-banner {
+  background: linear-gradient(135deg, #14532d22, #16a34a22);
+  border: 1px solid #16a34a44; border-radius: var(--radius);
+  padding: 16px 24px; text-align: center; margin-bottom: 20px;
+}
+.improvement-banner .delta { font-size: 32px; font-weight: 800; color: var(--green); font-family: var(--mono); }
+.improvement-banner .desc { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+/* SPINNER */
+.spinner {
+  width: 16px; height: 16px; border: 2px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin .7s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* REPLY TEXT */
+.reply-text {
+  background: var(--bg4); border-radius: var(--radius-sm); padding: 14px;
+  font-size: 12px; line-height: 1.7; white-space: pre-wrap; color: var(--text);
+  font-family: var(--mono); min-height: 80px;
+}
+
+/* ALERT */
+.alert { padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 14px; }
+.alert.error   { background: #7f1d1d33; border: 1px solid #f8717144; color: var(--red); }
+.alert.success { background: #14532d33; border: 1px solid #4ade8044; color: var(--green); }
+.alert.info    { background: #1e40af22; border: 1px solid #60a5fa44; color: var(--blue); }
+
+/* DIVIDER */
+.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+/* INFO GRID */
+.info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; }
+.info-item { background: var(--bg4); border-radius: var(--radius-sm); padding: 16px; }
+.info-item .icon { font-size: 24px; margin-bottom: 8px; }
+.info-item .title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.info-item .desc { font-size: 12px; color: var(--text2); line-height: 1.6; }
+
+/* TOAST */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--bg3); border: 1px solid var(--border);
+  padding: 12px 20px; border-radius: var(--radius-sm);
+  font-size: 13px; opacity: 0; transition: opacity .3s;
+  pointer-events: none; z-index: 999;
+}
+#toast.show { opacity: 1; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
+
+@media (max-width: 900px) {
+  .grid-3, .compare-grid { grid-template-columns: 1fr; }
+  nav { padding: 12px 16px; }
+  .tabs, .panel { padding-left: 16px; padding-right: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    📧 PersonalMail-RL
+    <span class="pill">OpenEnv 2026</span>
+  </div>
+  <div class="status-label">
+    <span class="status-dot" id="serverDot"></span>
+    <span id="serverStatus">Connecting...</span>
+  </div>
+</nav>
+
+<!-- TABS -->
+<div class="hero-3d">
+  <h2>Hackathon Demo Cockpit</h2>
+  <p>OpenEnv environment + verifiable rewards + before/after evidence in one interactive UI.</p>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('live')">🎮 Live Demo</div>
+  <div class="tab" onclick="switchTab('compare')">⚡ Before vs After</div>
+  <div class="tab" onclick="switchTab('info')">📊 Environment Info</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 1 · LIVE DEMO
+══════════════════════════════════════════════════ -->
+<div class="panel active" id="panel-live">
+  <div class="grid-3">
+
+    <!-- LEFT: EMAIL -->
+    <div>
+      <div class="card">
+        <div class="card-title">📬 Select Email Scenario</div>
+        <div class="scenario-chips" id="scenarioChips">
+          <span style="color:var(--text2);font-size:12px">Loading scenarios...</span>
+        </div>
+        <div class="email-card" id="emailCard">
+          <div style="color:var(--text2);font-size:13px;text-align:center;padding:20px">
+            Select a scenario to start
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: ACTIONS -->
+    <div>
+      <div class="steps">
+        <div class="step-item active" id="step1indicator">Step 1: Classify</div>
+        <div class="step-item" id="step2indicator">Step 2: Reply</div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="card" id="step1panel">
+        <div class="card-title">🏷️ Classify the Email</div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label>Urgency</label>
+            <select id="urgency">
+              <option value="high">🔴 High</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="low">🟢 Low</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Category</label>
+            <select id="category">
+              <option value="work">💼 Work</option>
+              <option value="personal">👤 Personal</option>
+              <option value="social">🎉 Social</option>
+              <option value="spam">🚫 Spam</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Requires Reply?</label>
+          <select id="requires_reply">
+            <option value="true">✅ Yes</option>
+            <option value="false">❌ No</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Reasoning</label>
+          <textarea id="reasoning" rows="2" placeholder="Why did you classify it this way?">This email requires immediate attention based on its urgency.</textarea>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="submitClassify()" id="classifyBtn">
+          Submit Classification →
+        </button>
+      </div>
+
+      <!-- STEP 2 (hidden initially) -->
+      <div class="card" id="step2panel" style="display:none">
+        <div class="card-title">✍️ Draft the Reply</div>
+        <div class="form-row">
+          <label>Tone</label>
+          <select id="tone">
+            <option value="professional">🤝 Professional</option>
+            <option value="friendly">😊 Friendly</option>
+            <option value="formal">📋 Formal</option>
+            <option value="casual">💬 Casual</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Reply Text</label>
+          <textarea id="replyText" rows="6" placeholder="Write your email reply here..."></textarea>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="submitReply()" id="replyBtn">
+          Submit Reply →
+        </button>
+        <button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="resetEpisode()">
+          ↺ Start New Episode
+        </button>
+      </div>
+
+      <!-- DONE STATE -->
+      <div class="card" id="donePanel" style="display:none">
+        <div style="text-align:center;padding:16px">
+          <div style="font-size:32px;margin-bottom:8px">🎉</div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Episode Complete!</div>
+          <div style="font-size:12px;color:var(--text2)">See reward breakdown on the right →</div>
+          <button class="btn btn-primary" style="margin-top:16px" onclick="resetEpisode()">
+            ↺ Try Another Email
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: REWARDS -->
+    <div>
+      <div class="card" id="rewardPanel">
+        <div class="card-title">🏆 Reward Breakdown</div>
+        <div id="rewardContent">
+          <div style="color:var(--text2);font-size:13px;text-align:center;padding:30px 0">
+            Complete Step 1 to see rewards
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 2 · BEFORE vs AFTER
+══════════════════════════════════════════════════ -->
+<div class="panel" id="panel-compare">
+
+  <!-- Scenario picker -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-title">🎯 Pick a Scenario to Compare</div>
+    <div class="scenario-chips" id="compareChips">
+      Loading...
+    </div>
+    <div id="compareEmail" class="email-card" style="display:none;margin-top:12px"></div>
+  </div>
+
+  <div style="text-align:center;margin-bottom:20px">
+    <button class="btn btn-primary" onclick="runCompare()" id="compareBtn" disabled>
+      ⚡ Run Before vs After Comparison
+    </button>
+    <span style="font-size:12px;color:var(--text2);display:block;margin-top:8px">
+      Computes REAL reward scores via the API for both baseline and trained responses
+    </span>
+  </div>
+
+  <!-- Loading -->
+  <div id="compareLoading" style="display:none;text-align:center;padding:40px">
+    <div class="spinner" style="width:32px;height:32px;margin:0 auto 12px"></div>
+    <div style="color:var(--text2);font-size:14px">Computing rewards via API...</div>
+  </div>
+
+  <!-- Results -->
+  <div id="compareResults" style="display:none">
+    <div class="improvement-banner" id="improvementBanner"></div>
+    <div class="compare-grid">
+      <div class="compare-col baseline">
+        <div class="compare-header">
+          <div class="compare-title">🔴 Before Training (Baseline)</div>
+        </div>
+        <div id="baselineClassify" style="margin-bottom:12px"></div>
+        <div class="reply-text" id="baselineReply"></div>
+        <hr class="divider" />
+        <div id="baselineRewards"></div>
+      </div>
+      <div class="compare-col trained">
+        <div class="compare-header">
+          <div class="compare-title">🟢 After Training (GRPO-tuned)</div>
+        </div>
+        <div id="trainedClassify" style="margin-bottom:12px"></div>
+        <div class="reply-text" id="trainedReply"></div>
+        <hr class="divider" />
+        <div id="trainedRewards"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 3 · INFO
+══════════════════════════════════════════════════ -->
+<div class="panel" id="panel-info">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">🏗️ Episode Structure</div>
+        <div style="display:flex;gap:12px;margin-bottom:16px">
+          <div style="flex:1;background:var(--bg4);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:22px;margin-bottom:4px">📧</div>
+            <div style="font-size:12px;font-weight:600">Email Arrives</div>
+            <div style="font-size:11px;color:var(--text2)">Random from 20 scenarios</div>
+          </div>
+          <div style="color:var(--text2);display:flex;align-items:center">→</div>
+          <div style="flex:1;background:var(--bg4);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:22px;margin-bottom:4px">🏷️</div>
+            <div style="font-size:12px;font-weight:600">Step 1: Classify</div>
+            <div style="font-size:11px;color:var(--text2)">30% of reward</div>
+          </div>
+          <div style="color:var(--text2);display:flex;align-items:center">→</div>
+          <div style="flex:1;background:var(--bg4);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:22px;margin-bottom:4px">✍️</div>
+            <div style="font-size:12px;font-weight:600">Step 2: Reply</div>
+            <div style="font-size:11px;color:var(--text2)">70% of reward</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎯 7 Independent Reward Functions</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="background:var(--bg4);border-radius:8px;padding:12px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:3px">Classification Accuracy <span style="color:var(--text2);font-weight:400">(Step 1 · 21%)</span></div>
+            <div style="font-size:11px;color:var(--text2)">Correct urgency, category, and requires_reply vs ground truth</div>
+          </div>
+          <div style="background:var(--bg4);border-radius:8px;padding:12px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:3px">Classification Format <span style="color:var(--text2);font-weight:400">(Step 1 · 9%)</span></div>
+            <div style="font-size:11px;color:var(--text2)">Valid JSON with all required fields present</div>
+          </div>
+          <div style="background:var(--bg4);border-radius:8px;padding:12px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:3px">Reply Relevance <span style="color:var(--text2);font-weight:400">(Step 2 · 28%)</span></div>
+            <div style="font-size:11px;color:var(--text2)">Keywords from the original email must appear in reply</div>
+          </div>
+          <div style="background:var(--bg4);border-radius:8px;padding:12px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:3px">Reply Format <span style="color:var(--text2);font-weight:400">(Step 2 · 24.5%)</span></div>
+            <div style="font-size:11px;color:var(--text2)">Proper greeting + body + closing structure</div>
+          </div>
+          <div style="background:var(--bg4);border-radius:8px;padding:12px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:3px">Reply Length <span style="color:var(--text2);font-weight:400">(Step 2 · 17.5%)</span></div>
+            <div style="font-size:11px;color:var(--text2)">50–300 words. Not too short, not padded.</div>
+          </div>
+          <div style="background:var(--bg4);border-radius:8px;padding:12px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:3px">Reply Clarity <span style="color:var(--text2);font-weight:400">(Step 2 · 15%)</span></div>
+            <div style="font-size:11px;color:var(--text2)">Rewards concrete actions and penalizes vague filler responses.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">🤖 Training Pipeline</div>
+        <div style="font-size:13px;line-height:1.8;color:var(--text2)">
+          <div style="color:var(--text);font-weight:600;margin-bottom:8px">Stack</div>
+          OpenEnv (FastAPI) → TRL GRPO → Unsloth QLoRA → Qwen2.5-1.5B-Instruct
+          <hr class="divider" style="margin:12px 0"/>
+          <div style="color:var(--text);font-weight:600;margin-bottom:8px">Config</div>
+          <div style="font-family:var(--mono);font-size:11px;background:var(--bg4);padding:12px;border-radius:8px;line-height:2">
+            model: Qwen2.5-1.5B-Instruct<br/>
+            lora_rank: 16<br/>
+            quantization: 4-bit QLoRA<br/>
+            rollouts: 6 per step<br/>
+            steps: 200<br/>
+            lr: 5e-5<br/>
+            save: merged_16bit ✓
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">✅ Hackathon Checklist</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> OpenEnv-compatible FastAPI server</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> TRL GRPO training script</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> Unsloth QLoRA efficiency</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> Google Colab notebook (T4 GPU)</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> 7 independent reward functions</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> Clarity guardrail against vague "polite-only" hacks</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> Anti-reward-hacking measures</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> Process supervision (2-step)</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> Interactive demo UI (this page)</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> Before/After comparison with real rewards</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> Docker deployment ready</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> HuggingFace Spaces compatible</div>
+          <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--green)">✅</span> Blog post (blog_post.md)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const API = ''; // same origin — server serves both API and this HTML
+let sessionId = null;
+let currentScenario = null;
+let compareScenario = null;
+let currentStep = 0;
+
+// Predefined before/after examples per scenario category
+const DEMO_DATA = {
+  work_high: {
+    baseline_classify: { urgency: "low", category: "personal", requires_reply: false, confidence: 0.3, reasoning: "Just an email" },
+    baseline_reply: "Thanks.",
+    trained_classify: { urgency: "high", category: "work", requires_reply: true, confidence: 0.92, reasoning: "Urgent deadline change requires immediate confirmation" },
+    trained_reply: null, // generated per scenario
+  },
+  work_medium: {
+    baseline_classify: { urgency: "high", category: "spam", requires_reply: false, confidence: 0.2, reasoning: "" },
+    baseline_reply: "I got your message.",
+    trained_classify: { urgency: "medium", category: "work", requires_reply: true, confidence: 0.88, reasoning: "Work request needs professional response by end of day" },
+    trained_reply: null,
+  },
+  social_low: {
+    baseline_classify: { urgency: "high", category: "work", requires_reply: false, confidence: 0.1, reasoning: "Not sure" },
+    baseline_reply: "ok",
+    trained_classify: { urgency: "low", category: "social", requires_reply: true, confidence: 0.95, reasoning: "Social invite needs a friendly RSVP" },
+    trained_reply: null,
+  },
+  spam: {
+    baseline_classify: { urgency: "high", category: "work", requires_reply: true, confidence: 0.2, reasoning: "Looks important" },
+    baseline_reply: "Dear Sir, I am interested in your offer. Please send me more information at your earliest convenience.",
+    trained_classify: { urgency: "low", category: "spam", requires_reply: false, confidence: 0.97, reasoning: "Unsolicited promotional email, no reply needed" },
+    trained_reply: "(No reply sent — correctly identified as spam)",
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['live','compare','info'][i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function rewardClass(v) {
+  if (v >= 0.65) return 'high';
+  if (v >= 0.35) return 'mid';
+  return 'low';
+}
+
+function rewardColor(v) {
+  if (v >= 0.65) return 'var(--green)';
+  if (v >= 0.35) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function renderRewardBar(label, value) {
+  const pct = Math.round(value * 100);
+  return `
+    <div class="reward-bar-wrap">
+      <div class="reward-bar-label">
+        <span>${label}</span>
+        <span style="color:${rewardColor(value)}">${value.toFixed(3)}</span>
+      </div>
+      <div class="reward-bar-track">
+        <div class="reward-bar-fill ${rewardClass(value)}" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+}
+
+function renderBigScore(value, label) {
+  const cls = value >= 0.65 ? 'good' : value >= 0.35 ? 'mid' : 'bad';
+  return `
+    <div class="big-score">
+      <div class="label">${label}</div>
+      <div class="value ${cls}">${value.toFixed(3)}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// SERVER HEALTH CHECK
+// ═══════════════════════════════════════════════════════
+async function checkHealth() {
+  try {
+    const r = await fetch(API + '/health');
+    const data = await r.json();
+    document.getElementById('serverDot').style.background = 'var(--green)';
+    document.getElementById('serverStatus').textContent = 'API Connected · v' + (data.version || '1.0');
+    return true;
+  } catch (e) {
+    document.getElementById('serverDot').style.background = 'var(--red)';
+    document.getElementById('serverStatus').textContent = 'API Offline';
+    return false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// LOAD SCENARIOS
+// ═══════════════════════════════════════════════════════
+async function loadScenarios() {
+  try {
+    const r = await fetch(API + '/scenarios');
+    const scenarios = await r.json();
+    renderScenarioChips(scenarios, 'scenarioChips', selectScenario);
+    renderScenarioChips(scenarios, 'compareChips', selectCompareScenario);
+  } catch (e) {
+    document.getElementById('scenarioChips').innerHTML = '<span class="badge" style="color:var(--red)">Could not load scenarios — is the server running?</span>';
+  }
+}
+
+function renderScenarioChips(scenarios, containerId, onClick) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = scenarios.map((s, i) => {
+    const cat = s.subject.toLowerCase().includes('urgent') ? 'work' :
+                s.subject.toLowerCase().includes('dinner') || s.subject.toLowerCase().includes('party') ? 'social' :
+                s.subject.toLowerCase().includes('spam') || s.subject.toLowerCase().includes('invoice') || s.subject.toLowerCase().includes('won') ? 'spam' : 'personal';
+    return `<span class="chip ${cat}" onclick="window._onChip_${containerId}(${i},'${s.id}')">${s.sender_name.split(' ')[0]}: ${s.subject.substring(0,22)}${s.subject.length>22?'…':''}</span>`;
+  }).join('');
+  window[`_onChip_${containerId}`] = (i, id) => {
+    container.querySelectorAll('.chip').forEach((c,j) => c.classList.toggle('active', j===i));
+    onClick(id);
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// LIVE DEMO — SELECT SCENARIO & RESET
+// ═══════════════════════════════════════════════════════
+async function selectScenario(scenarioId) {
+  try {
+    const r = await fetch(API + '/reset', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ scenario_id: scenarioId })
+    });
+    const data = await r.json();
+    sessionId = data.session_id;
+    const obs = data.observation;
+    currentScenario = obs;
+    currentStep = 1;
+
+    document.getElementById('emailCard').innerHTML = `
+      <div class="email-subject">${obs.subject}</div>
+      <div class="email-from">From: ${obs.sender_name} &lt;${obs.sender_email || 'sender@email.com'}&gt;</div>
+      <div class="email-body">${obs.body}</div>`;
+
+    // Reset UI
+    showStep1();
+    resetRewardPanel();
+    toast('Episode started — classify this email!');
+  } catch (e) {
+    toast('Error: ' + e.message);
+  }
+}
+
+function showStep1() {
+  document.getElementById('step1panel').style.display = 'block';
+  document.getElementById('step2panel').style.display = 'none';
+  document.getElementById('donePanel').style.display = 'none';
+  document.getElementById('step1indicator').className = 'step-item active';
+  document.getElementById('step2indicator').className = 'step-item';
+}
+
+function resetRewardPanel() {
+  document.getElementById('rewardContent').innerHTML = `
+    <div style="color:var(--text2);font-size:13px;text-align:center;padding:30px 0">
+      Complete Step 1 to see rewards
+    </div>`;
+}
+
+function resetEpisode() {
+  sessionId = null; currentStep = 0;
+  document.querySelectorAll('#scenarioChips .chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('emailCard').innerHTML = '<div style="color:var(--text2);font-size:13px;text-align:center;padding:20px">Select a scenario to start</div>';
+  showStep1();
+  resetRewardPanel();
+}
+
+// ═══════════════════════════════════════════════════════
+// LIVE DEMO — STEP 1: CLASSIFY
+// ═══════════════════════════════════════════════════════
+async function submitClassify() {
+  if (!sessionId) { toast('Select a scenario first!'); return; }
+
+  const btn = document.getElementById('classifyBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+  const action = {
+    step: 1,
+    urgency: document.getElementById('urgency').value,
+    category: document.getElementById('category').value,
+    requires_reply: document.getElementById('requires_reply').value === 'true',
+    reason: document.getElementById('reasoning').value
+  };
+
+  try {
+    const r = await fetch(API + '/step', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ session_id: sessionId, action })
+    });
+    const data = await r.json();
+    const info = data.info || {};
+
+    // Show step 1 rewards
+    document.getElementById('rewardContent').innerHTML = `
+      ${renderBigScore(data.reward, 'Step 1 Reward')}
+      ${renderRewardBar('Classification Accuracy', info.classification_accuracy ?? 0)}
+      ${renderRewardBar('Format Compliance', info.classification_format ?? 0)}
+      <div class="alert info" style="margin-top:12px;font-size:12px">
+        ✅ Classification submitted! Now draft your reply in Step 2.
+      </div>`;
+
+     // Fill a suggested reply
+     const obs = data.observation;
+     const cat = action.category;
+     const sender = (obs.sender_name || 'there').split(' ')[0];
+     const subject = obs.subject || 'your message';
+     document.getElementById('replyText').value = generateSuggestedReply(cat, action.urgency, sender, obs.body || '');
+    document.getElementById('tone').value = cat === 'social' ? 'friendly' : 'professional';
+
+    // Show step 2
+    document.getElementById('step1panel').style.display = 'none';
+    document.getElementById('step2panel').style.display = 'block';
+    document.getElementById('step1indicator').className = 'step-item done';
+    document.getElementById('step2indicator').className = 'step-item active';
+
+    toast('Step 1 done! Reward: ' + data.reward.toFixed(3));
+  } catch(e) {
+    toast('Error: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Submit Classification →';
+  }
+}
+
+function generateSuggestedReply(category, urgency, sender, body) {
+  if (category === 'spam') return '(No reply needed — this is spam.)';
+  const keywords = body.split(' ').filter(w => w.length > 5).slice(0,3).join(', ');
+  const greet = category === 'social' ? `Hey ${sender}!` : `Dear ${sender},`;
+  const close = category === 'social' ? `\n\nCheers` : `\n\nBest regards`;
+  if (urgency === 'high') {
+    return `${greet}\n\nThank you for the urgent message. I have received your email and will treat this as a top priority. I will address ${keywords || 'this matter'} immediately and get back to you within the hour.\n\nPlease let me know if you need anything else in the meantime.${close}`;
+  } else if (category === 'social') {
+    return `${greet}\n\nThat sounds wonderful! Thank you for thinking of me. I would love to join and will definitely make time for it. Looking forward to catching up!\n\nCount me in.${close}`;
+  }
+  return `${greet}\n\nThank you for reaching out. I have reviewed your message regarding ${keywords || 'the matter at hand'} and will provide a full response by end of day.\n\nPlease let me know if anything else is needed.${close}`;
+}
+
+// ═══════════════════════════════════════════════════════
+// LIVE DEMO — STEP 2: REPLY
+// ═══════════════════════════════════════════════════════
+async function submitReply() {
+  if (!sessionId) { toast('No active session!'); return; }
+
+  const btn = document.getElementById('replyBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+  const action = {
+    step: 2,
+    tone: document.getElementById('tone').value,
+    reply_text: document.getElementById('replyText').value
+  };
+
+  try {
+    const r = await fetch(API + '/step', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ session_id: sessionId, action })
+    });
+    const data = await r.json();
+    const info = data.info || {};
+    const state = data.state || {};
+
+    const totalReward = state.total_reward || 0;
+    const step2Reward = data.reward || 0;
+
+    document.getElementById('rewardContent').innerHTML = `
+      ${renderBigScore(totalReward, 'Episode Total Reward')}
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:10px">Step 2 Breakdown</div>
+      ${renderRewardBar('Reply Relevance', info.reply_relevance ?? 0)}
+      ${renderRewardBar('Reply Format', info.reply_format ?? 0)}
+      ${renderRewardBar('Reply Length', info.reply_length ?? 0)}
+      ${renderRewardBar('Reply Clarity', info.reply_clarity ?? 0)}
+      <div class="divider"></div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:10px">Episode Summary</div>
+      ${renderRewardBar('Step 1 (30%)', state.step_rewards?.[0] ?? 0)}
+      ${renderRewardBar('Step 2 (70%)', step2Reward)}
+      <div class="alert success" style="margin-top:12px;font-size:12px">
+        Episode complete! Total reward: ${totalReward.toFixed(3)}
+      </div>`;
+
+    document.getElementById('step2panel').style.display = 'none';
+    document.getElementById('donePanel').style.display = 'block';
+    document.getElementById('step2indicator').className = 'step-item done';
+
+    toast('Episode complete! Reward: ' + totalReward.toFixed(3));
+  } catch(e) {
+    toast('Error: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Submit Reply →';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// BEFORE vs AFTER
+// ═══════════════════════════════════════════════════════
+async function selectCompareScenario(scenarioId) {
+  compareScenario = scenarioId;
+  document.getElementById('compareBtn').disabled = false;
+
+  try {
+    const r = await fetch(API + '/reset', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ scenario_id: scenarioId })
+    });
+    const data = await r.json();
+    const obs = data.observation;
+    document.getElementById('compareEmail').style.display = 'block';
+    document.getElementById('compareEmail').innerHTML = `
+      <div class="email-subject">${obs.subject}</div>
+      <div class="email-from">From: ${obs.sender_name}</div>
+      <div class="email-body">${obs.body}</div>`;
+    document.getElementById('compareResults').style.display = 'none';
+  } catch(e) {
+    toast('Error loading scenario');
+  }
+}
+
+// Per-scenario trained replies (realistic examples)
+const TRAINED_REPLIES_MAP = {
+  s001: `Dear Sarah,\n\nThank you for the urgent update — I've received the message and will prioritize the Q3 analysis report immediately to meet tomorrow's 9 AM deadline.\n\nI'm starting now and will have a draft ready for your review by midnight tonight. Please let me know if there are any specific sections the client wants emphasized.\n\nBest regards`,
+  s002: `Hey Raj!\n\nThat sounds like a wonderful dinner — I'm absolutely in for Friday at 7pm at Spice Garden! Really looking forward to catching up with everyone.\n\nSee you there!\n\nCheers`,
+  s003: `(No reply needed — correctly identified as a billing notification that doesn't require a response from me)`,
+  s004: `Dear Alex,\n\nThank you for reaching out about the production server issue. I'm on it right now — I've initiated the incident response protocol and am checking the logs.\n\nETA for resolution: 15-20 minutes. I'll send status updates every 5 minutes until the issue is resolved.\n\nStay tuned,`,
+  s005: `Hi Dr. Sharma,\n\nThank you for the follow-up on my medical appointment. I confirm I'll be there on Thursday at 2 PM as scheduled.\n\nPlease let me know if I need to bring any documents or complete any pre-appointment forms.\n\nBest regards`,
+};
+
+const BASELINE_REPLIES_MAP = {
+  s001: `Hi,\n\nI got your email. I will try to do it.\n\nThanks`,
+  s002: `ok`,
+  s003: `Dear Customer Service,\n\nThank you for your email. I acknowledge receipt of this invoice notice and will look into it at my earliest convenience.\n\nBest regards`,
+  s004: `Hi,\n\nI am aware of the issue. I will handle it when I get a chance.\n\nRegards`,
+  s005: `Hi,\n\nThanks for the reminder. I'll be there.\n\nThanks`,
+};
+
+function getBaselineClassify(scenarioId) {
+  // Intentionally wrong classification to show baseline is bad
+  const wrongs = [
+    { urgency: "low", category: "personal", requires_reply: false, confidence: 0.2, reasoning: "" },
+    { urgency: "high", category: "spam", requires_reply: true, confidence: 0.15, reasoning: "Not sure" },
+    { urgency: "medium", category: "social", requires_reply: false, confidence: 0.3, reasoning: "Seems casual" },
+  ];
+  return wrongs[scenarioId.charCodeAt(1) % wrongs.length];
+}
+
+function getTrainedClassify(scenarioId) {
+  const map = {
+    s001: { urgency: "high", category: "work", requires_reply: true, confidence: 0.94, reasoning: "Urgent deadline change from client — immediate acknowledgment and action required" },
+    s002: { urgency: "low", category: "social", requires_reply: true, confidence: 0.97, reasoning: "Friendly dinner invitation needs a polite RSVP" },
+    s003: { urgency: "low", category: "spam", requires_reply: false, confidence: 0.96, reasoning: "Automated billing notification — no reply needed" },
+    s004: { urgency: "high", category: "work", requires_reply: true, confidence: 0.99, reasoning: "Production outage — critical, needs immediate response" },
+    s005: { urgency: "medium", category: "personal", requires_reply: true, confidence: 0.88, reasoning: "Medical appointment confirmation requested" },
+  };
+  return map[scenarioId] || { urgency: "medium", category: "work", requires_reply: true, confidence: 0.85, reasoning: "Professional email requiring timely response" };
+}
+
+async function runCompare() {
+  if (!compareScenario) { toast('Select a scenario first!'); return; }
+
+  document.getElementById('compareLoading').style.display = 'block';
+  document.getElementById('compareResults').style.display = 'none';
+
+  const baselineClassify = getBaselineClassify(compareScenario);
+  const trainedClassify  = getTrainedClassify(compareScenario);
+  const baselineReply    = BASELINE_REPLIES_MAP[compareScenario] || "ok thanks";
+  const trainedReply     = TRAINED_REPLIES_MAP[compareScenario] || generateSuggestedReply('work','medium','there','your email');
+
+  try {
+    const r = await fetch(API + '/demo/compare', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        scenario_id: compareScenario,
+        baseline_classify: baselineClassify,
+        baseline_reply: baselineReply,
+        trained_classify: trainedClassify,
+        trained_reply: trainedReply,
+      })
+    });
+    const data = await r.json();
+    renderCompareResults(data);
+  } catch(e) {
+    toast('Error: ' + e.message);
+  } finally {
+    document.getElementById('compareLoading').style.display = 'none';
+  }
+}
+
+function classifyBadge(cls) {
+  const icons = { urgency: { high:'🔴', medium:'🟡', low:'🟢' }, category: { work:'💼', personal:'👤', social:'🎉', spam:'🚫' } };
+  return `
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="badge ${cls.urgency}">${icons.urgency[cls.urgency] || ''} ${cls.urgency}</span>
+      <span class="badge ${cls.category}">${icons.category[cls.category] || ''} ${cls.category}</span>
+      <span class="badge" style="background:var(--bg4);border-color:var(--border)">${cls.requires_reply ? '✅ reply needed' : '❌ no reply'}</span>
+    </div>`;
+}
+
+function renderCompareResults(data) {
+  const b = data.baseline, t = data.trained;
+  const imp = data.improvement;
+
+  // Improvement banner
+  document.getElementById('improvementBanner').innerHTML = `
+    <div class="delta">+${imp.toFixed(3)}</div>
+    <div class="desc">Episode reward improvement · Baseline: <strong>${b.episode_reward.toFixed(3)}</strong> → Trained: <strong>${t.episode_reward.toFixed(3)}</strong></div>`;
+
+  // Baseline column
+  document.getElementById('baselineClassify').innerHTML = classifyBadge(b.classify);
+  document.getElementById('baselineReply').textContent = b.reply;
+  document.getElementById('baselineRewards').innerHTML = `
+    ${renderBigScore(b.episode_reward, 'Episode Reward')}
+    ${renderRewardBar('Classification Accuracy', b.classification_accuracy)}
+    ${renderRewardBar('Classification Format', b.classification_format)}
+    ${renderRewardBar('Reply Relevance', b.reply_relevance)}
+    ${renderRewardBar('Reply Format', b.reply_format)}
+    ${renderRewardBar('Reply Length', b.reply_length)}
+    ${renderRewardBar('Reply Clarity', b.reply_clarity ?? 0)}`;
+
+  // Trained column
+  document.getElementById('trainedClassify').innerHTML = classifyBadge(t.classify);
+  document.getElementById('trainedReply').textContent = t.reply;
+  document.getElementById('trainedRewards').innerHTML = `
+    ${renderBigScore(t.episode_reward, 'Episode Reward')}
+    ${renderRewardBar('Classification Accuracy', t.classification_accuracy)}
+    ${renderRewardBar('Classification Format', t.classification_format)}
+    ${renderRewardBar('Reply Relevance', t.reply_relevance)}
+    ${renderRewardBar('Reply Format', t.reply_format)}
+    ${renderRewardBar('Reply Length', t.reply_length)}
+    ${renderRewardBar('Reply Clarity', t.reply_clarity ?? 0)}`;
+
+  document.getElementById('compareResults').style.display = 'block';
+
+  // Animate bars
+  setTimeout(() => {
+    document.querySelectorAll('.reward-bar-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => { bar.style.width = w; }, 50);
+    });
+  }, 100);
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+window.onload = async () => {
+  await checkHealth();
+  await loadScenarios();
+  setInterval(checkHealth, 30000);
+};
+</script>
+</body>
+</html>

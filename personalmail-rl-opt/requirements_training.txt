@@ -1,0 +1,17 @@
+# Training dependencies (run on GPU — use Colab or HuggingFace)
+torch==2.4.0
+transformers==4.46.0
+trl==0.12.0
+peft==0.13.0
+accelerate==1.0.1
+bitsandbytes==0.44.1
+datasets==3.0.2
+sentencepiece==0.2.0
+protobuf==5.28.3
+
+# Unsloth (required for GRPO training stack)
+unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git
+
+# Logging & utilities
+wandb==0.18.5
+huggingface_hub==0.25.2

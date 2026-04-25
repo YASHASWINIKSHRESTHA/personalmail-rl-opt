@@ -1,0 +1,65 @@
+name: personalmail-rl
+version: "1.0.0"
+description: >
+  RL environment for training LLMs to handle personal emails.
+  Two-step episodes: classify then reply. 6 independent reward functions.
+  Theme #3.2 — Personalized Tasks. OpenEnv India Apr 2026 Hackathon.
+
+theme: "3.2 - Personalized Tasks"
+tags:
+  - email
+  - personalization
+  - multi-step
+  - classification
+  - reply-generation
+
+environment:
+  module: env.environment
+  class: PersonalMailEnv
+  server: server:app
+
+observation_space:
+  type: dict
+  fields:
+    - episode_id
+    - email_id
+    - subject
+    - body
+    - sender_name
+    - sender_email
+    - current_step
+    - max_steps
+    - done
+    - classification
+    - instruction
+    - difficulty
+
+action_space:
+  step_1:
+    type: classify
+    fields: [urgency, category, requires_reply, reason]
+  step_2:
+    type: reply
+    fields: [tone, reply_text]
+
+reward:
+  range: [0.0, 1.0]
+  functions:
+    - classification_accuracy   # Step 1: urgency + category + requires_reply
+    - classification_format     # Step 1: JSON structure compliance
+    - reply_format              # Step 2: greeting + body + closing
+    - reply_relevance           # Step 2: keyword coverage of email intent
+    - reply_length              # Step 2: appropriate word count
+    - tone_matching             # Step 2: tone matches email context
+    - reply_clarity             # Step 2: actionable and specific (anti-vague)
+
+curriculum:
+  enabled: true
+  levels: [easy, medium, hard]
+  progression: reward_threshold  # advance when avg reward > 0.7
+
+deployment:
+  port: 7863
+  host: "0.0.0.0"
+  health_endpoint: /health
+  spaces_compatible: true
