@@ -27,10 +27,10 @@ MAX_SEQ_LENGTH = 1024
 LORA_RANK = 16
 BATCH_SIZE = 2
 GRAD_ACCUM = 4
-NUM_GENERATIONS = 6      # GRPO rollouts per prompt
-MAX_NEW_TOKENS = 512
+NUM_GENERATIONS = 4      # GRPO rollouts per prompt
+MAX_NEW_TOKENS = 128
 LEARNING_RATE = 5e-5
-NUM_TRAIN_STEPS = 200
+NUM_TRAIN_STEPS = 100
 SAVE_STEPS = 50
 OUTPUT_DIR = "./outputs/personalmail-grpo"
 USE_LOCAL_ENV = True     # True = use local env (no server needed)
@@ -306,7 +306,7 @@ training_config = GRPOConfig(
     max_steps=NUM_TRAIN_STEPS,
     # GRPO specific
     num_generations=NUM_GENERATIONS,
-    max_new_tokens=MAX_NEW_TOKENS,
+    
     temperature=0.9,
     # Logging
     logging_steps=10,
