@@ -30,9 +30,9 @@ GRAD_ACCUM = 4
 NUM_GENERATIONS = 4      # GRPO rollouts per prompt
 MAX_NEW_TOKENS = 128
 LEARNING_RATE = 5e-5
-NUM_TRAIN_STEPS = 100
+NUM_TRAIN_STEPS = 30
 SAVE_STEPS = 50
-OUTPUT_DIR = "./outputs/personalmail-grpo"
+OUTPUT_DIR = "./outputs/personalmail-grpo-v3"
 USE_LOCAL_ENV = True     # True = use local env (no server needed)
 ENV_SERVER_URL = "http://localhost:7863"
 
