@@ -54,8 +54,11 @@ def classification_format_reward(action: Dict) -> Tuple[float, str]:
     present = [f for f in required_fields if action.get(f) is not None]
     score = len(present) / len(required_fields)
 
-    has_reason = bool(action.get("reason", "").strip())
-    reason_length = len(action.get("reason", "").split())
+    reason = action.get("reason", "")
+    if isinstance(reason, list):
+        reason = " ".join(str(x) for x in reason)
+    has_reason = bool(str(reason).strip())
+    reason_length = len(str(reason).split())
     if has_reason and reason_length >= 5:
         score = min(1.0, score + 0.1)
 
