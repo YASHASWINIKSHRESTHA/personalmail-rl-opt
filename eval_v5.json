@@ -1,0 +1,30 @@
+{
+  "num_scenarios": 12,
+  "baseline": {
+    "classification": 0.6046,
+    "reply_total": 0.4421,
+    "reply_format": 0.5417,
+    "reply_relevance": 0.375,
+    "reply_length": 0.45,
+    "tone_matching": 0.3527,
+    "episode_total": 0.4908
+  },
+  "trained": {
+    "classification": 0.3738,
+    "reply_total": 0.7516,
+    "reply_format": 0.9208,
+    "reply_relevance": 0.7083,
+    "reply_length": 0.7667,
+    "tone_matching": 0.634,
+    "episode_total": 0.6382
+  },
+  "improvement": {
+    "classification": -0.2308,
+    "reply_total": 0.3095,
+    "reply_format": 0.3791,
+    "reply_relevance": 0.3333,
+    "reply_length": 0.3167,
+    "tone_matching": 0.2813,
+    "episode_total": 0.1474
+  }
+}
