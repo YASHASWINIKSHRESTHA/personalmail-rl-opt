@@ -261,6 +261,8 @@ PYTHONPATH=./personalmail-rl-opt \
 }
 ```
 
+![Rewards](Rewards.png)
+
 ### Results Summary Table
 
 | Metric | Baseline | Trained | Improvement |
