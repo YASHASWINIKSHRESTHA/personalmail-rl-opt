@@ -47,6 +47,8 @@ Personal emails are not equal. A message from your manager about a missed deadli
 └─────────────────────────────────────────────────────────────┘
 ```
 
+![Architecture Diagram](architecture_diagram.png)
+
 ### Step 1 — Email Classification
 The agent receives the email and outputs:
 ```json
