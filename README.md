@@ -7,6 +7,8 @@
 **Code:** [💻 GitHub](https://github.com/YASHASWINIKSHRESTHA/personalmail-rl-opt)
 **Youtube Video:** [Link for youtube](https://youtu.be/-Pt0tR6fFHk)
 **Blog link:** [Link ](https://github.com/YASHASWINIKSHRESTHA/personalmail-rl-opt/edit/main/README.md)
+**PPT link:** [Link ](https://drive.google.com/file/d/1zJqvaRuZBc4nzoP15ueDAZJUDymJYURU/view?usp=sharing)
+
 
 
 
