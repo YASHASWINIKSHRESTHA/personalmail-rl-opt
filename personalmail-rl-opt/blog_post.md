@@ -16,12 +16,12 @@ That's exactly what **PersonalMail-RL** does.
 
 ## What We Built
 
-**PersonalMail-RL** is an OpenEnv-compatible reinforcement learning environment that trains LLMs to classify and reply to personal emails through two-step episodes with 6 independent, verifiable reward functions.
+**PersonalMail-RL** is an OpenEnv-compatible reinforcement learning environment that trains LLMs to classify and reply to personal emails through two-step episodes with 7 independent, verifiable reward functions.
 
 The stack:
 - **Environment**: OpenEnv FastAPI server (`reset()` / `step()` / `state()`) with timeout protection + anti-reward-hacking
 - **Training**: TRL GRPO + Unsloth QLoRA on Qwen2.5-1.5B-Instruct
-- **Rewards**: 6 independent reward functions (no learned reward model!)
+- **Rewards**: 7 independent reward functions (no learned reward model!)
 - **Curriculum**: 25 scenarios across 3 difficulty levels — easy → medium → hard progression
 - **Demo**: Gradio app + standalone HTML UI with real reward scoring
 
@@ -68,7 +68,7 @@ The key to making RL work — and preventing reward hacking — is **multiple in
 | `reply_length` | 2 | 40–150 words target window |
 | `tone_matching` | 2 | lexical signals match expected tone (professional/friendly/assertive/apologetic) |
 
-Using 6 independent functions means the model can't hack its way to high reward by exploiting any single signal. If it generates a beautifully formatted email that ignores the actual request, `reply_relevance` drops to zero. If it gets the content right but uses an aggressive tone for a friendly dinner invitation, `tone_matching` penalises it.
+Using 7 independent functions means the model can't hack its way to high reward by exploiting any single signal. If it generates a beautifully formatted email that ignores the actual request, `reply_relevance` drops to zero. If it gets the content right but uses an aggressive tone for a friendly dinner invitation, `tone_matching` penalises it.
 
 ---
 
@@ -100,7 +100,7 @@ Following the hackathon guide's explicit recommendation, we built in multiple pr
 1. **Episode timeout** (120 seconds): any episode that runs too long gets a `-0.5` penalty reward and terminates — prevents infinite loops
 2. **Duplicate action detection**: identical actions on consecutive steps trigger an early termination with penalty
 3. **Action history tracking**: every step is logged with a timestamp for post-training inspection
-4. **Multi-function reward**: 6 independent signals means exploiting one still leaves 5 others penalizing bad behavior
+4. **Multi-function reward**: 7 independent signals means exploiting one still leaves 6 others penalizing bad behavior
 5. **Spam/phishing scenarios**: the model must learn to NOT reply — a `requires_reply: false` scenario that rewards restraint over action
 
 ---
