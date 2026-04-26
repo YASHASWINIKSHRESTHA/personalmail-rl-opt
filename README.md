@@ -6,6 +6,9 @@
 **Model:** [🤗 ykshrestha/personalmail-rl-qwen](https://huggingface.co/ykshrestha/personalmail-rl-qwen)  
 **Code:** [💻 GitHub](https://github.com/YASHASWINIKSHRESTHA/personalmail-rl-opt)
 **Youtube Video:** [Link for youtube](https://youtu.be/-Pt0tR6fFHk)
+**Blog link:** [Link ](https://github.com/YASHASWINIKSHRESTHA/personalmail-rl-opt/edit/main/README.md)
+
+
 
 > ⚠️ **To view live inference results in the demo, please select Nvidia A100 Large GPU in HuggingFace Space Settings before running.**
 
