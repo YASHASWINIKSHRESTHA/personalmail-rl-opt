@@ -8,6 +8,7 @@
 **Youtube Video:** [Link for youtube](https://youtu.be/-Pt0tR6fFHk)
 **Blog link:** [Link ](https://github.com/YASHASWINIKSHRESTHA/personalmail-rl-opt/edit/main/README.md)
 **PPT link:** [Link ](https://drive.google.com/file/d/1zJqvaRuZBc4nzoP15ueDAZJUDymJYURU/view?usp=sharing)
+**Training Scripts link:** [Link ](https://colab.research.google.com/drive/1BzqnU0X7qyfIRa70a4Pfduvwq8aXi89g?usp=sharing)
 
 
 
